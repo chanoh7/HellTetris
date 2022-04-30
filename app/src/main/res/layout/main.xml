@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@drawable/field"
+    android:orientation="vertical">
+
+    <!-- 화면 타이틀 -->
+    <ImageView
+        android:id="@+id/imageView1"
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
+        android:layout_margin="10dp"
+        android:layout_weight="6"
+        android:src="@drawable/tetris" />
+
+	<!-- 게임 시작 -->
+    <ImageView
+        android:id="@+id/game"
+        style="@style/information"
+        android:onClick="onMenuSelect"
+        android:src="@drawable/start" />
+
+	<!-- 조작 방법 -->
+    <ImageView
+        android:id="@+id/how_to_play"
+        style="@style/information"
+        android:onClick="onMenuSelect"
+        android:src="@drawable/howtoplay" />
+
+	<!-- 게임 종료 -->
+	<ImageView
+        android:id="@+id/exit"
+        style="@style/information"
+        android:onClick="onMenuSelect"
+        android:src="@drawable/exit" />
+</LinearLayout>
+

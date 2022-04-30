@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">HellTetris</string>
+    <string name="exit_title">종료할까요?</string>
+    <string name="exit_message">게임 내용은 저장되지 않습니다</string>
+    <string name="button_ok">OK</string>
+    <string name="button_cancel">Cancel</string>
+        
+    <string name="clear_easy">EASY모드 클리어!</string>
+    <string name="next_of_easy">다음은 NORMAL!!</string>
+    
+    <string name="clear_normal">NORMAL모드 클리어 ＞_＜!!</string>
+    <string name="next_of_normal">이제 HARD 모드 ㄱㄱ!!!</string>
+    
+    <string name="clear_hard">HARD모드 클리어ㅇㅅㅇ?!</string>
+    <string name="next_of_hard">EXTREME은 못 깰 겁니다 ㅋㅋㅋㅋㅋㅋ</string>
+    
+    <string name="clear_extreme">EXTREME을 깼어?!?!!</string>
+    <string name="next_of_extreme">당신이 바로 이 시대의 초인입니다 -ㅂ-;;</string>
+    <string name="next_of_extreme_2">HELL을 정복하면 무엇이 기다리고 있을까ㅋ?</string>
+    
+    <string name="over_the_extreme_">더 하시게요 -_-?</string>
+    <string name="over_the_extreme_1">많이 하셨잖아요 ＇ㅠ＇;;</string>
+    <string name="over_the_extreme_2">이제 그만하세요 ＇ㅡ＇</string>
+    <string name="over_the_extreme_3">할 거 많잖아요 ㅠㅠ</string>
+    <string name="over_the_extreme_4">없어요ㅇㅅㅇ???</string>
+    <string name="over_the_extreme_5">부럽다... OTL</string>
+    <string name="over_the_extreme_6">그런데...ㅋ</string>
+    <string name="over_the_extreme_7">아직도 이거 읽고 계세요?</string>
+    <string name="over_the_extreme_8">이거 안 끝나는데ㅋㅋㅋㅋ</string>
+    <string name="over_the_extreme_9">슬슬 끄셔야죠 ＇ㅠ＇ㅋ</string>
+    <string name="over_the_extreme_10">강제종료 하세요</string>
+    <string name="over_the_extreme_11">ㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋ</string>
+
+    <string name="clear_hell">HELL모드 클리어 ＇ㅁ＇..</string>
+    <string name="over_the_hell_0">잠깐만요...</string>
+    <string name="over_the_hell_1">눈물 좀 닦고요 ㅠㅠ</string>
+    <string name="over_the_hell_2">헬모드 깨셨어요???</string>
+    <string name="over_the_hell_3">진짜네...ㅇㅁㅇ;;</string>
+    <string name="over_the_hell_4">설마 여기까지 와 준 사람이 있다니 ;ㅁ;</string>
+    <string name="over_the_hell_5">정말 수고하셨습니다. (__)</string>
+    <string name="over_the_hell_6">감사합니다.</string>
+
+</resources>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/field"
+    android:orientation="vertical">
+
+    <!-- 화면 타이틀 -->
+    <ImageView
+        style="@style/information"
+        android:src="@drawable/touch" />
+
+    <!-- 이동 설명 -->
+    <ImageView
+        style="@style/information"
+        android:src="@drawable/move" />
+
+    <!-- 회전 설명 -->
+    <ImageView
+        style="@style/information"
+        android:src="@drawable/rotation" />
+
+    <!-- 낙하(가속) 설명 -->
+    <ImageView
+        style="@style/information"
+        android:src="@drawable/down" />
+
+    <!-- 낙하(즉시 착지) 설명 -->
+    <ImageView
+        style="@style/information"
+        android:src="@drawable/drop" />
+
+    <!-- 나가기 버튼 -->
+    <ImageView
+        style="@style/information"
+        android:layout_weight="1"
+        android:onClick="backToHome"
+        android:src="@drawable/back" />
+
+</LinearLayout>

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+	<!-- 블록 층 리니어  -->
+	<style name="blockline">
+		<item name="android:layout_height">0dp</item>
+		<item name="android:layout_width">fill_parent</item>
+		<item name="android:layout_weight">1</item>
+		<item name="android:layout_marginTop">1dp</item>
+	</style>
+	
+	<!-- 빈칸 블록 -->
+	<style name="emptyblock">
+		<item name="android:layout_height">fill_parent</item>
+		<item name="android:layout_width">0dp</item>
+		<item name="android:layout_weight">1</item>
+		<item name="android:layout_marginRight">1dp</item>
+		<item name="android:background">#ff000000</item>
+		<item name="android:scaleType">fitXY</item>
+	</style>
+	
+	<!-- 미리보기 층 리니어 -->
+	<style name="previewline" parent="blockline">
+		<item name="android:layout_weight">3</item>
+	</style>
+	
+	<!-- 미리보기 층 여백 리니어 -->
+	<style name="emptypreviewline" parent="blockline">
+		<item name="android:layout_weight">1</item>
+	</style>
+	
+	<!-- 미리보기 블록 -->
+	<style name="previewblock" parent="emptyblock">
+		<item name="android:layout_weight">3</item>
+	</style>
+	
+	<!-- 미리보기 블록 -->
+	<style name="emptypreviewblock" parent="emptyblock">
+		<item name="android:layout_weight">1</item>
+		<item name="android:background">@android:color/darker_gray</item>
+	</style>
+	
+	<!-- 오른쪽 세로 리니어  -->
+	<style name="rightlinear">
+		<item name="android:layout_height">0dp</item>
+		<item name="android:layout_width">fill_parent</item>
+		<item name="android:layout_weight">2</item>
+		<item name="android:layout_marginLeft">5dp</item>
+		<item name="android:layout_marginRight">5dp</item>
+	</style>
+	
+	<!-- 숫자 값 -->
+	<style name="digit_value">
+		<item name="android:layout_height">fill_parent</item>
+		<item name="android:layout_width">0dp</item>
+		<item name="android:layout_weight">1</item>
+	</style>
+	
+	<!-- 조작 안내 그림 -->
+	<style name="information">
+		<item name="android:layout_height">0dp</item>
+		<item name="android:layout_width">fill_parent</item>
+		<item name="android:layout_weight">2</item>
+		<item name="android:layout_margin">10dp</item>
+	</style>
+	
+	
+	
+</resources>
