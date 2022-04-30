@@ -1,8 +1,9 @@
 package hell.tetris;
 
- public class ResourceID {
+public class ResourceID {
+    //TODO https://ddolcat.tistory.com/540
     //난이도 버튼 그림
-    public static final int LEVEL[] =
+    public static final int[] LEVEL =
             {
                     R.drawable.easy,
                     R.drawable.normal,
@@ -12,7 +13,7 @@ package hell.tetris;
             };
 
     //숫자 그림
-    public static final int DIGIT[] =
+    public static final int[] DIGIT =
             {
                     R.drawable.digit0,
                     R.drawable.digit1,
@@ -27,7 +28,7 @@ package hell.tetris;
             };
 
     //블록 색
-    public static final int BLOCK_COLOR[] =
+    public static final int[] BLOCK_COLOR =
             {
                     //공백. 블록 지울 때 사용
                     R.drawable.blank_dot,
@@ -62,7 +63,7 @@ package hell.tetris;
             };
 
     //클리어 메세지
-    public static final int CLEAR_OF[] =
+    public static final int[] CLEAR_OF =
             {
                     R.string.clear_easy,
                     R.string.clear_normal,
@@ -72,7 +73,7 @@ package hell.tetris;
             };
 
     //클리어 메세지
-    public static final int NEXT_OF[] =
+    public static final int[] NEXT_OF =
             {
                     R.string.next_of_easy,
                     R.string.next_of_normal,
@@ -82,7 +83,7 @@ package hell.tetris;
             };
 
     //익스트림 클리어 후
-    public static final int OVER_THE_EXTREME[] =
+    public static final int[] OVER_THE_EXTREME =
             {
                     R.string.over_the_extreme_,
                     R.string.over_the_extreme_1,
@@ -99,7 +100,7 @@ package hell.tetris;
             };
 
     //헬 클리어 후
-    public static final int OVER_THE_HELL[] =
+    public static final int[] OVER_THE_HELL =
             {
                     R.string.over_the_hell_0,
                     R.string.over_the_hell_1,
