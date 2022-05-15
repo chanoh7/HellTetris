@@ -1,5 +1,6 @@
 package hell.tetris.activity;
 
+import android.content.res.TypedArray;
 import android.util.DisplayMetrics;
 import android.widget.*;
 import android.app.*;
@@ -11,7 +12,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import androidx.databinding.DataBindingUtil;
 import hell.tetris.BlockShape;
 import hell.tetris.R;
-import hell.tetris.ResourceID;
 import hell.tetris.databinding.ActivityGameboardBinding;
 
 enum ActiveState {STATE_READY, STATE_RUN, STATE_PAUSE, STATE_END}
@@ -42,8 +42,9 @@ enum GameType {
 
 public class GameBoardActivity extends Activity {
 
-    private static final int MAX_LINE = 24;         //화면 층 수
-    private static final int BLOCK_IN_LINE = 10;    //한 줄 블록 수
+    private static final int MAX_LINE = 24;             //화면 층 수
+    private static final int BLOCK_IN_LINE = 10;        //한 줄 블록 수
+    private static final int PREVIEW_WINDOW_SIZE = 4;   //미리보기 창 크기
 
     private static final int STARTING_X = 3;    //소환 위치
     private static final int X = 0;
@@ -84,14 +85,15 @@ public class GameBoardActivity extends Activity {
     private static final int BTN_PAUSE = R.drawable.pause;
     private static final int BTN_RESUME = R.drawable.resume;
     private static final int BTN_SURPRISE = R.drawable.suprise;
-    private static final int PREVIEW_WINDOW_SIZE = 4;
 
     ImageView[][] blockField;   //블록 쌓이는 필드
     ImageView[][] previewBlock; //다음 블록 미리보기 창
     ImageView[] levelView;      //현재 레벨 표시 뷰
     ImageView[] scoreView;      //점수 표시 뷰
 
-    int[] blockColorAry;  //블록 색
+    TypedArray levelImgAry; //난이도 그림 id
+    TypedArray digitImgAry; //숫자 그림 id
+    int[] blockColorAry;    //블록 색
     int[][] blockAry;       //블록 필드 색칠 상태
     int[] lineWeight;       //각 층의 블록 수
     int[][] currentBlock;   //낙하중인 블록
@@ -111,13 +113,21 @@ public class GameBoardActivity extends Activity {
     int exp;        //경험치통
     int multi;      //여러 줄 깰 때 추가 경험치
     int combo;      //연속으로 깰 때 추가 경험치
-    int dropHeight; //강제낙하 높이
+    int dropHeight; //강제낙하가 실행된 높이
 
     // 터치 이벤트 관련
     float touchX, touchY;
     boolean singleMotion;
+
+    //이스터 에그 플래그
     boolean clearExtreme = false;
     boolean clearHell = false;
+
+    //난이도 별 최고점수 찍었을 때 메시지
+    String[] overTheHellMsg;
+    String[] overTheExtremeMsg;
+    String[] clearOf;
+    String[] nextOf;
 
     // 입력, 자동진행 상호배제용
     int what;
@@ -142,22 +152,8 @@ public class GameBoardActivity extends Activity {
 
         init();
         initBlockField();
-        initPreview();
-        setScoreAndLevelView();
+        initGameInfo();
         resetData();
-    }
-
-    private void init() {
-        blockColorAry = getResources().getIntArray(R.array.block_color);
-
-        lineWeight = new int[MAX_LINE + 2];
-        blockAry = new int[MAX_LINE + 2][BLOCK_IN_LINE];
-        for (int i = 0; i < BLOCK_IN_LINE; i++) {
-            blockAry[0][i] = -1;
-        }
-
-        gameType = GameType.NORMAL;
-        state = ActiveState.STATE_READY;
     }
 
     //일시 이탈 시 정지
@@ -165,7 +161,7 @@ public class GameBoardActivity extends Activity {
         super.onPause();
         if (state == ActiveState.STATE_RUN) {
             state = ActiveState.STATE_PAUSE;
-            ((ImageView) findViewById(R.id.btnState)).setImageResource(BTN_RESUME);
+            binding.btnState.setImageResource(BTN_RESUME);
         }
     }
 
@@ -195,6 +191,7 @@ public class GameBoardActivity extends Activity {
             //내가 다 처리했다
             return true;
         }
+
         switch (event.getAction()) {
             //초기 터치 위치 기록
             case MotionEvent.ACTION_DOWN:
@@ -287,7 +284,7 @@ public class GameBoardActivity extends Activity {
     public void onClickState(View v) {
         switch (state) {
             case STATE_READY:
-                ((ImageView) findViewById(R.id.btnLevel)).setClickable(false);
+                binding.btnLevel.setClickable(false);
                 state = ActiveState.STATE_RUN;
                 ((ImageView) v).setImageResource(BTN_PAUSE);
                 run();
@@ -321,9 +318,24 @@ public class GameBoardActivity extends Activity {
     //난이도 변경
     public void onClickLevel(View v) {
         gameType = gameType.next();
-        ((ImageView) v).setImageResource(ResourceID.LEVEL[gameType.ordinal()]);
+        setImage((ImageView) v, levelImgAry, gameType.ordinal());
 
         makeNextBlock();
+    }
+
+    private void init() {
+        blockColorAry = getResources().getIntArray(R.array.block_color);
+        digitImgAry = getResources().obtainTypedArray(R.array.digit);
+        levelImgAry = getResources().obtainTypedArray(R.array.level);
+
+        lineWeight = new int[MAX_LINE + 2];
+        blockAry = new int[MAX_LINE + 2][BLOCK_IN_LINE];
+        for (int i = 0; i < BLOCK_IN_LINE; i++) {
+            blockAry[0][i] = -1;
+        }
+
+        gameType = GameType.NORMAL;
+        state = ActiveState.STATE_READY;
     }
 
     //블록 필드 생성
@@ -361,8 +373,8 @@ public class GameBoardActivity extends Activity {
         }
     }
 
-    //미리보기 뷰 초기화
-    private void initPreview() {
+    //미리보기, 점수, 레벨 뷰 초기화
+    private void initGameInfo() {
         previewBlock = new ImageView[PREVIEW_WINDOW_SIZE][PREVIEW_WINDOW_SIZE];
 
         //여백 맞추느라 위, 앞에 더미 뷰 하나씩 있어서 인덱스에 +1씩 함.
@@ -372,20 +384,19 @@ public class GameBoardActivity extends Activity {
                 previewBlock[i][j] = (ImageView) line.getChildAt(j + 1);
             }
         }
-    }
 
-    //점수/레벨 표시 뷰를 배열에 연결
-    private void setScoreAndLevelView() {
-        int levelViewCount = binding.layoutLevel.getChildCount();
-        levelView = new ImageView[levelViewCount];
-        for (int i = 0; i < levelViewCount; i++) {
-            levelView[i] = (ImageView) binding.layoutLevel.getChildAt(i);
-        }
-
+        //점수 뷰
         int scoreViewCount = binding.layoutScore.getChildCount();
         scoreView = new ImageView[scoreViewCount];
         for (int i = 0; i < scoreViewCount; i++) {
             scoreView[i] = (ImageView) binding.layoutScore.getChildAt(i);
+        }
+
+        //레벨 뷰
+        int levelViewCount = binding.layoutLevel.getChildCount();
+        levelView = new ImageView[levelViewCount];
+        for (int i = 0; i < levelViewCount; i++) {
+            levelView[i] = (ImageView) binding.layoutLevel.getChildAt(i);
         }
     }
 
@@ -394,8 +405,8 @@ public class GameBoardActivity extends Activity {
         level = score = 0;
         updateLevel(true);
 
-        ((ImageView) findViewById(R.id.btnLevel)).setClickable(true);
-        ((ImageView) findViewById(R.id.btnLevel)).setImageResource(ResourceID.LEVEL[gameType.ordinal()]);
+        binding.btnLevel.setClickable(true);
+        setImage(binding.btnLevel, levelImgAry, gameType.ordinal());
 
         what = 0;
         speed = INITIAL_SPEED;
@@ -431,10 +442,11 @@ public class GameBoardActivity extends Activity {
             return;
         }
 
-        if (what == 0)
+        if (what == 0) {
             blockDropFlow();
-        else
+        } else {
             command();
+        }
 
         //락 해제
         busy.getAndSet(false);
@@ -484,12 +496,12 @@ public class GameBoardActivity extends Activity {
                 case PHASE_LINE_ERASE:
                     /* 한 줄이 꽉 참.
                      * 꽉 찬 줄을 제거하고, 다음 블럭 소환하러 감. */
-                    clearFilledLine();
+                    clearFilledLines();
                     break;
 
                 case PHASE_END:
                     state = ActiveState.STATE_END;
-                    ((ImageView) findViewById(R.id.btnState)).setImageResource(BTN_RESET);
+                    binding.btnState.setImageResource(BTN_RESET);
                     break;
             }
     }
@@ -579,7 +591,7 @@ public class GameBoardActivity extends Activity {
 
             return true;
         }
-        //웜가 걸리면 멈춤
+        //어딘가에 걸리면 멈춤
         else {
             phase = GamePhase.PHASE_LINE_SET;
             return false;
@@ -598,8 +610,9 @@ public class GameBoardActivity extends Activity {
                 i--;
             }
 
-            if (i > 0 && blockAry[y - i][x + j] != 0)
+            if (i > 0 && blockAry[y - i][x + j] != 0) {
                 drop = false;
+            }
         }
 
         return drop;
@@ -618,7 +631,7 @@ public class GameBoardActivity extends Activity {
         //이번 블록이 멈춘 줄들을 검사하자
         for (int i = 0; i < blockSize[Y]; i++) {
             //블록이 새로 생긴 층은 블록 카운트 증가
-            for (int j = 0; j < blockSize[X]; j++)
+            for (int j = 0; j < blockSize[X]; j++) {
                 if (currentBlock[i][j] != 0) {
                     lineWeight[y - i]++;
 
@@ -626,10 +639,12 @@ public class GameBoardActivity extends Activity {
                     score += EXP_SINGLE_BLOCK;
                     exp += EXP_SINGLE_BLOCK;
                 }
+            }
 
             //한 줄이 꽉 차면 지울 블록이 생겼다고 표시
-            if (lineWeight[y - i] == BLOCK_IN_LINE)
+            if (lineWeight[y - i] == BLOCK_IN_LINE) {
                 clear = true;
+            }
         }
 
         //줄 삭제 페이즈로 갈 경우 거기서 점수 갱신을 할 것이고, 그렇지 않은 경우 여기서 해야 한다.
@@ -646,7 +661,7 @@ public class GameBoardActivity extends Activity {
     }
 
     //블록이 떨어진 곳에서 꽉 찬 줄 찾아서 제거
-    private void clearFilledLine() {
+    private void clearFilledLines() {
         //방금 떨어진 블록의 바닥 줄
         int i = y - blockSize[Y] + 1;
 
@@ -728,7 +743,7 @@ public class GameBoardActivity extends Activity {
         //점수판 각 자릿수에 맞는 숫자 출력
         int scale = 100000;
         for (ImageView scoreDigit : scoreView) {
-            scoreDigit.setImageResource(ResourceID.DIGIT[(score / scale) % 10]);
+            setImage(scoreDigit, digitImgAry, (score / scale) % 10);
             scale /= 10;
         }
     }
@@ -740,8 +755,8 @@ public class GameBoardActivity extends Activity {
 
         if (isLvUp) {
             level++;
-            levelView[0].setImageResource(ResourceID.DIGIT[level / 10]);
-            levelView[1].setImageResource(ResourceID.DIGIT[level % 10]);
+            setImage(levelView[0], digitImgAry, level / 10);
+            setImage(levelView[1], digitImgAry, level % 10);
             speed -= SPEEDUP;
             bonusDel = level;
         } else {
@@ -753,9 +768,7 @@ public class GameBoardActivity extends Activity {
         combo++;
         for (int i = 1; lineWeight[1] > 0 && i < bonusDel; i++) {
             multi++;
-
             clearTargetLine(1);
-
             score += EXP_SINGLE_LINE * multi * combo;
         }
 
@@ -780,8 +793,9 @@ public class GameBoardActivity extends Activity {
 
             case CMD_DROP:
                 eraseBlock();
-                while (isDownable())
+                while (isDownable()) {
                     y--;
+                }
                 drawBlock();
 
                 exp += (dropHeight - y) * EXP_DROP;
@@ -792,8 +806,9 @@ public class GameBoardActivity extends Activity {
 
             //회전 명령은, 현재 블록이 회전 가능한 블록일 때만 호출
             case CMD_ROTATE:
-                if (BlockShape.getNumOfRotation(blockNumber) > 1)
+                if (BlockShape.getNumOfRotation(blockNumber) > 1) {
                     rotate();
+                }
                 break;
         }
 
@@ -810,20 +825,24 @@ public class GameBoardActivity extends Activity {
         //왼쪽으로 화면 이탈 검사
         if (moved_x == -2) return;
         else if (moved_x == -1) {
-            for (i = 0; i < blockSize[Y] && currentBlock[i][0] == 0; i++)
-                ;
+            for (i = 0; i < blockSize[Y] && currentBlock[i][0] == 0; i++) {
+                //do nothing
+            }
 
-            if (i < blockSize[Y])
+            if (i < blockSize[Y]) {
                 return;
+            }
         }
 
         //왼쪽에 장애물 검사
         for (i = 0; i < blockSize[Y]; i++) {
-            for (j = 0; j < blockSize[X] && currentBlock[i][j] == 0; j++)
-                ;
+            for (j = 0; j < blockSize[X] && currentBlock[i][j] == 0; j++) {
+                //do nothing
+            }
 
-            if (j < blockSize[X] && blockAry[y - i][moved_x + j] != 0)
+            if (j < blockSize[X] && blockAry[y - i][moved_x + j] != 0) {
                 movable = false;
+            }
         }
 
         if (movable) {
@@ -845,16 +864,19 @@ public class GameBoardActivity extends Activity {
         boolean movable = true;
 
         //오른쪽으로 화면 이탈 검사
-        if (moved_x + blockSize[X] > BLOCK_IN_LINE)
+        if (moved_x + blockSize[X] > BLOCK_IN_LINE) {
             return;
+        }
 
         //오른쪽에 장애물 검사
         for (i = 0; i < blockSize[Y]; i++) {
-            for (j = blockSize[X]; j > 0 && currentBlock[i][j - 1] == 0; j--)
-                ;
+            for (j = blockSize[X]; j > 0 && currentBlock[i][j - 1] == 0; j--) {
+                //do nothing
+            }
 
-            if (j > 0 && blockAry[y - i][x + j] != 0)
+            if (j > 0 && blockAry[y - i][x + j] != 0) {
                 movable = false;
+            }
         }
 
         if (movable) {
@@ -871,11 +893,13 @@ public class GameBoardActivity extends Activity {
 
     //회전
     private void rotate() {
-        int nextSize[] = BlockShape.getNextSize(blockNumber, blockRotation);
+        int[] nextSize = BlockShape.getNextSize(blockNumber, blockRotation);
         int nextX = x;
 
         //지하 뚫게 생기면 회전 안 함
-        if (y - nextSize[Y] < 1) return;
+        if (y - nextSize[Y] < 1) {
+            return;
+        }
 
         //블록 정보를 저장한 뒤
         int[][] tempBlock = currentBlock;
@@ -884,8 +908,9 @@ public class GameBoardActivity extends Activity {
         int tempX = x;
 
         //가로축 방향으로 화면 나가게 생기면 안쪽으로 끌어와서 판정
-        if (x < 0) nextX = 0;
-        else {
+        if (x < 0) {
+            nextX = 0;
+        } else {
             int j = x + nextSize[X];
             while (j > BLOCK_IN_LINE) {
                 j--;
@@ -916,32 +941,39 @@ public class GameBoardActivity extends Activity {
 
     //블록이 겹치는지 조사
     private boolean isOverlap() {
-        for (int i = 0; i < blockSize[Y]; i++)
-            for (int j = 0; j < blockSize[X]; j++)
-                if (currentBlock[i][j] != 0 && blockAry[y - i][x + j] != 0)
+        for (int i = 0; i < blockSize[Y]; i++) {
+            for (int j = 0; j < blockSize[X]; j++) {
+                if (currentBlock[i][j] != 0 && blockAry[y - i][x + j] != 0) {
                     return true;
+                }
+            }
+        }
 
         return false;
     }
 
     //낙하중인 블록을 현 위치에서 지운다.
     private void eraseBlock() {
-        for (int i = 0; i < blockSize[Y]; i++)
-            for (int j = 0; j < blockSize[X]; j++)
+        for (int i = 0; i < blockSize[Y]; i++) {
+            for (int j = 0; j < blockSize[X]; j++) {
                 if (currentBlock[i][j] != 0) {
                     blockAry[y - i][x + j] = 0;
                     setOneBlock(y - i - 1, x + j, 0);
                 }
+            }
+        }
     }
 
     //현재 낙하중인 블록을 그린다.
     private void drawBlock() {
-        for (int i = 0; i < blockSize[Y]; i++)
-            for (int j = 0; j < blockSize[X]; j++)
+        for (int i = 0; i < blockSize[Y]; i++) {
+            for (int j = 0; j < blockSize[X]; j++) {
                 if (currentBlock[i][j] != 0) {
                     blockAry[y - i][x + j] = blockNumber;
                     setOneBlock(y - i - 1, x + j, blockNumber);
                 }
+            }
+        }
     }
 
     //주어진 위치에 지정 블록 채우기
@@ -954,7 +986,10 @@ public class GameBoardActivity extends Activity {
         score = MAX_SCORE;
 
         state = ActiveState.STATE_END;
-        ((ImageView) findViewById(R.id.btnState)).setImageResource(BTN_RESET);
+        binding.btnState.setImageResource(BTN_RESET);
+
+        clearOf = getResources().getStringArray(R.array.clear_of);
+        nextOf = getResources().getStringArray(R.array.next_of);
 
         switch (gameType) {
             case EASY:
@@ -962,8 +997,8 @@ public class GameBoardActivity extends Activity {
             case HARD:
                 new AlertDialog.Builder(this)
                         .setCancelable(false)
-                        .setTitle(ResourceID.CLEAR_OF[gameType.ordinal()])
-                        .setMessage(ResourceID.NEXT_OF[gameType.ordinal()])
+                        .setTitle(clearOf[gameType.ordinal()])
+                        .setMessage(nextOf[gameType.ordinal()])
                         .setPositiveButton(R.string.button_ok, null)
                         .show();
 
@@ -974,9 +1009,11 @@ public class GameBoardActivity extends Activity {
                 clearExtreme = true;
 
                 blockAry = BlockShape.SHUTDOWN_ARY;
-                for (int i = 1; i <= MAX_LINE; i++)
-                    for (int j = 0; j < BLOCK_IN_LINE; j++)
+                for (int i = 1; i <= MAX_LINE; i++) {
+                    for (int j = 0; j < BLOCK_IN_LINE; j++) {
                         setOneBlock(i - 1, j, blockAry[MAX_LINE - i][j]);
+                    }
+                }
 
                 new AlertDialog.Builder(this)
                         .setCancelable(false)
@@ -995,7 +1032,7 @@ public class GameBoardActivity extends Activity {
 
             case HELL:
                 clearHell = true;
-                ((ImageView) findViewById(R.id.btnState)).setImageResource(BTN_SURPRISE);
+                binding.btnState.setImageResource(BTN_SURPRISE);
 
                 new AlertDialog.Builder(this)
                         .setCancelable(false)
@@ -1009,10 +1046,14 @@ public class GameBoardActivity extends Activity {
     //Extreme 클리어 메시지를 순서대로 띄움
     //마지막 두 문장은 같이 나옴
     private void esterEggExtreme(int messageIndex) {
-        if (messageIndex < ResourceID.OVER_THE_EXTREME.length - 2) {
+        if (overTheExtremeMsg == null) {
+            overTheExtremeMsg = getResources().getStringArray(R.array.over_the_extreme);
+        }
+
+        if (messageIndex < overTheExtremeMsg.length - 2) {
             new AlertDialog.Builder(this)
                     .setCancelable(false)
-                    .setTitle(ResourceID.OVER_THE_EXTREME[messageIndex])
+                    .setTitle(overTheExtremeMsg[messageIndex])
                     .setPositiveButton(
                             R.string.button_ok,
                             (dialog, whichButton) -> esterEggExtreme(messageIndex + 1)
@@ -1021,30 +1062,39 @@ public class GameBoardActivity extends Activity {
         } else {
             new AlertDialog.Builder(this)
                     .setCancelable(false)
-                    .setTitle(ResourceID.OVER_THE_EXTREME[messageIndex])
-                    .setMessage(ResourceID.OVER_THE_EXTREME[messageIndex + 1])
+                    .setTitle(overTheExtremeMsg[messageIndex])
+                    .setMessage(overTheExtremeMsg[messageIndex + 1])
                     .show();
         }
     }
 
     //Hell 클리어 메시지를 순서대로 띄움
     private void esterEggHell(int messageIndex) {
-        if (messageIndex < ResourceID.OVER_THE_HELL.length) {
+        if (overTheHellMsg == null) {
+            overTheHellMsg = getResources().getStringArray(R.array.over_the_hell);
+        }
+
+        if (messageIndex < overTheHellMsg.length) {
             new AlertDialog.Builder(this)
                     .setCancelable(false)
-                    .setTitle(ResourceID.OVER_THE_HELL[messageIndex])
+                    .setTitle(overTheHellMsg[messageIndex])
                     .setPositiveButton(
                             R.string.button_ok,
                             (dialog, whichButton) -> esterEggHell(messageIndex + 1)
                     )
                     .show();
         } else {
-//            message++;//TODO ???
             blockAry = BlockShape.THANKS_FOR_PLAY;
-            for (int i = 1; i <= MAX_LINE; i++)
-                for (int j = 0; j < BLOCK_IN_LINE; j++)
+            for (int i = 1; i <= MAX_LINE; i++) {
+                for (int j = 0; j < BLOCK_IN_LINE; j++) {
                     setOneBlock(i - 1, j, blockAry[MAX_LINE - i][j]);
+                }
+            }
         }
+    }
+
+    private void setImage(ImageView imageView, TypedArray drawableAry, int i) {
+        imageView.setImageDrawable(drawableAry.getDrawable(i));
     }
 
     private int dp2px(int dp) {

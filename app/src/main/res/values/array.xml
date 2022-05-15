@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="block_color">
+        <item>@color/empty_block</item>
+
+        <item>@color/block_1</item>
+        <item>@color/block_2</item>
+        <item>@color/block_3</item>
+        <item>@color/block_4</item>
+        <item>@color/block_5</item>
+        <item>@color/block_6</item>
+        <item>@color/block_7</item>
+        
+        <item>@color/block_8</item>
+        <item>@color/block_9</item>
+        
+        <item>@color/block_10</item>        
+        <item>@color/block_11</item>
+        <item>@color/block_12</item>
+        <item>@color/block_13</item>
+        <item>@color/block_14</item>
+        <item>@color/block_15</item>
+        <item>@color/block_16</item>
+        <item>@color/block_17</item>
+        <item>@color/block_18</item>
+        <item>@color/block_19</item>
+        <item>@color/block_20</item>
+        <item>@color/block_21</item>
+        <item>@color/block_22</item>
+    </array>
+
+    <array name="level">
+        <item>@drawable/easy</item>
+        <item>@drawable/normal</item>
+        <item>@drawable/hard</item>
+        <item>@drawable/extreme</item>
+        <item>@drawable/hell</item>
+    </array>
+
+    <array name="digit">
+        <item>@drawable/digit0</item>
+        <item>@drawable/digit1</item>
+        <item>@drawable/digit2</item>
+        <item>@drawable/digit3</item>
+        <item>@drawable/digit4</item>
+        <item>@drawable/digit5</item>
+        <item>@drawable/digit6</item>
+        <item>@drawable/digit7</item>
+        <item>@drawable/digit8</item>
+        <item>@drawable/digit9</item>
+    </array>
+
+    <array name="clear_of">
+        <item>@string/clear_easy</item>
+        <item>@string/clear_normal</item>
+        <item>@string/clear_hard</item>
+    </array>
+
+    <array name="next_of">
+        <item>@string/next_of_easy</item>
+        <item>@string/next_of_normal</item>
+        <item>@string/next_of_hard</item>
+    </array>
+
+    <array name="over_the_extreme">
+        <item>@string/over_the_extreme_0</item>
+        <item>@string/over_the_extreme_1</item>
+        <item>@string/over_the_extreme_2</item>
+        <item>@string/over_the_extreme_3</item>
+        <item>@string/over_the_extreme_4</item>
+        <item>@string/over_the_extreme_5</item>
+        <item>@string/over_the_extreme_6</item>
+        <item>@string/over_the_extreme_7</item>
+        <item>@string/over_the_extreme_8</item>
+        <item>@string/over_the_extreme_9</item>
+        <item>@string/over_the_extreme_10</item>
+        <item>@string/over_the_extreme_11</item>
+    </array>
+
+    <array name="over_the_hell">
+        <item>@string/over_the_hell_0</item>
+        <item>@string/over_the_hell_1</item>
+        <item>@string/over_the_hell_2</item>
+        <item>@string/over_the_hell_3</item>
+        <item>@string/over_the_hell_4</item>
+        <item>@string/over_the_hell_5</item>
+        <item>@string/over_the_hell_6</item>
+    </array>
+
+</resources>
