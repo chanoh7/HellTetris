@@ -59,10 +59,6 @@ public class GameBoardActivity extends Activity {
     private static final int CMD_DROP = 4;
     private static final int CMD_ROTATE = 5;
 
-    private static final int CMD_MOVE_RANGE = 20;    //명령인식 정밀도 TODO 화면 크기에 따라 가변 값으로 수정
-    private static final int CMD_DROP_RANGE = 90;
-    private static final int CMD_ROTATE_RANGE = 30;
-
     private static final int MAX_LEVEL = 15;        //만렙(블록 낙하 속도)
     private static final int INITIAL_SPEED = 500;   //렙1 때 낙하속도
     private static final int SPEEDUP = 25;          //가속량
@@ -118,6 +114,10 @@ public class GameBoardActivity extends Activity {
     // 터치 이벤트 관련
     float touchX, touchY;
     boolean singleMotion;
+
+    int cmdMoveRange;   //명령인식 정밀도 (화면 크기에 따라 가변 값)
+    int cmdDropRange;
+    int cmdRotateRange;
 
     //이스터 에그 플래그
     boolean clearExtreme = false;
@@ -209,7 +209,7 @@ public class GameBoardActivity extends Activity {
                 // 세로 방향 모션이 더 클 때
                 if (cmpY * cmpY > cmpX * cmpX) {
                     //회전
-                    if (singleMotion && cmpY < -CMD_ROTATE_RANGE) {
+                    if (singleMotion && cmpY < -cmdRotateRange) {
                         what = CMD_ROTATE;
                         touchX = event.getX();
                         touchY = event.getY();
@@ -217,7 +217,7 @@ public class GameBoardActivity extends Activity {
                         run();
                     }
                     // 떨구기
-                    else if (y < MAX_LINE && singleMotion && cmpY > CMD_DROP_RANGE) {
+                    else if (y < MAX_LINE && singleMotion && cmpY > cmdDropRange) {
                         what = CMD_DROP;
                         //강제낙하시킨 높이도 기록
                         dropHeight = y;
@@ -227,7 +227,7 @@ public class GameBoardActivity extends Activity {
                         run();
                     }
                     // 내리기
-                    else if (cmpY > CMD_MOVE_RANGE) {
+                    else if (cmpY > cmdMoveRange) {
                         what = CMD_DOWN;
                         touchX = event.getX();
                         touchY = event.getY();
@@ -237,14 +237,14 @@ public class GameBoardActivity extends Activity {
                 //가로 모션이 더 클 때
                 else {
                     //오른쪽 이동
-                    if (cmpX > CMD_MOVE_RANGE) {
+                    if (cmpX > cmdMoveRange) {
                         what = CMD_RIGHT;
                         touchX = event.getX();
                         touchY = event.getY();
                         run();
                     }
                     //왼쪽 이동
-                    else if (cmpX < -CMD_MOVE_RANGE) {
+                    else if (cmpX < -cmdMoveRange) {
                         what = CMD_LEFT;
                         touchX = event.getX();
                         touchY = event.getY();
@@ -327,6 +327,14 @@ public class GameBoardActivity extends Activity {
         blockColorAry = getResources().getIntArray(R.array.block_color);
         digitImgAry = getResources().obtainTypedArray(R.array.digit);
         levelImgAry = getResources().obtainTypedArray(R.array.level);
+
+        //명령 인식 정밀도 설정(화면 크기 반영)
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        int screenWidth = displayMetrics.widthPixels;
+        cmdMoveRange = screenWidth / 50;
+        cmdDropRange = Integer.min(cmdMoveRange * 4, 200);
+        cmdRotateRange = Integer.min((int) (cmdMoveRange * 1.5), 40);
 
         lineWeight = new int[MAX_LINE + 2];
         blockAry = new int[MAX_LINE + 2][BLOCK_IN_LINE];
