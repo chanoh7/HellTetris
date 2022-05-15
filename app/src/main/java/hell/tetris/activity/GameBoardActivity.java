@@ -1,5 +1,6 @@
 package hell.tetris.activity;
 
+import android.util.DisplayMetrics;
 import android.widget.*;
 import android.app.*;
 import android.os.*;
@@ -83,13 +84,14 @@ public class GameBoardActivity extends Activity {
     private static final int BTN_PAUSE = R.drawable.pause;
     private static final int BTN_RESUME = R.drawable.resume;
     private static final int BTN_SURPRISE = R.drawable.suprise;
-    public static final int PREVIEW_WINDOW_SIZE = 4;
+    private static final int PREVIEW_WINDOW_SIZE = 4;
 
-    ImageView[][] Blocks;   //블록 쌓이는 필드
-    ImageView[][] Preview;  //다음 블록 미리보기 창
-    ImageView[] levelView;  //현재 레벨 표시 뷰
-    ImageView[] scoreView;  //점수 표시 뷰
+    ImageView[][] blockField;   //블록 쌓이는 필드
+    ImageView[][] previewBlock; //다음 블록 미리보기 창
+    ImageView[] levelView;      //현재 레벨 표시 뷰
+    ImageView[] scoreView;      //점수 표시 뷰
 
+    int[] blockColorAry;  //블록 색
     int[][] blockAry;       //블록 필드 색칠 상태
     int[] lineWeight;       //각 층의 블록 수
     int[][] currentBlock;   //낙하중인 블록
@@ -132,23 +134,29 @@ public class GameBoardActivity extends Activity {
         }
     };
 
-    //생성자
+    ActivityGameboardBinding binding;
+
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ActivityGameboardBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_gameboard);
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_gameboard);
 
-        SetBlocksView();
+        init();
+        initBlockField();
         SetPreview();
         setScoreAndLevelView();
+        resetData();
+    }
 
-        blockAry = new int[MAX_LINE + 2][BLOCK_IN_LINE];
+    private void init() {
+        blockColorAry = getResources().getIntArray(R.array.block_color);
+
         lineWeight = new int[MAX_LINE + 2];
+        blockAry = new int[MAX_LINE + 2][BLOCK_IN_LINE];
         for (int i = 0; i < BLOCK_IN_LINE; i++) {
             blockAry[0][i] = -1;
         }
 
-        gameType = GameType.EASY;
-        resetData();
+        gameType = GameType.NORMAL;
         state = ActiveState.STATE_READY;
     }
 
@@ -165,24 +173,28 @@ public class GameBoardActivity extends Activity {
     public boolean onKeyDown(int KeyCode, KeyEvent event) {
         switch (KeyCode) {
             case KeyEvent.KEYCODE_BACK:
-                if (state == ActiveState.STATE_RUN)
+                if (state == ActiveState.STATE_RUN) {
                     state = ActiveState.STATE_PAUSE;
+                }
 
                 showDialog(DIA_EXIT);
                 break;
 
             default:
-                return false;//시스템에게 (나머지) 처리를 넘긴다
+                //시스템에게 (나머지) 처리를 넘긴다
+                return false;
         }
 
-        return true;//내가 다 처리했다
+        //내가 다 처리했다
+        return true;
     }
 
     //터치 이벤트로 명령 입력
     public boolean onTouchEvent(MotionEvent event) {
-        if (dropHeight > 0 || state != ActiveState.STATE_RUN)
-            return true;//내가 다 처리했다
-
+        if (dropHeight > 0 || state != ActiveState.STATE_RUN) {
+            //내가 다 처리했다
+            return true;
+        }
         switch (event.getAction()) {
             //초기 터치 위치 기록
             case MotionEvent.ACTION_DOWN:
@@ -249,9 +261,11 @@ public class GameBoardActivity extends Activity {
                 break;
 
             default:
-                return false;//시스템에게 넘긴다.
+                //시스템에게 넘긴다.
+                return false;
         }
-        return true;//내가 다 처리했다
+        //내가 다 처리했다
+        return true;
     }
 
     //대화상자 미리 생성
@@ -291,11 +305,11 @@ public class GameBoardActivity extends Activity {
                 break;
 
             case STATE_END:
-                if (clearExtreme)
+                if (clearExtreme) {
                     esterEggExtreme(0);
-                else if (clearHell)
+                } else if (clearHell) {
                     esterEggHell(0);
-                else {
+                } else {
                     resetWithScreen();
                     state = ActiveState.STATE_READY;
                     ((ImageView) v).setImageResource(BTN_RESUME);
@@ -312,309 +326,71 @@ public class GameBoardActivity extends Activity {
         makeNextBlock();
     }
 
-    //블록 뷰와 코드를 연결
-    private void SetBlocksView() {
-        Blocks = new ImageView[MAX_LINE + 1][BLOCK_IN_LINE];
+    //블록 필드 생성
+    private void initBlockField() {
+        blockField = new ImageView[MAX_LINE + 1][BLOCK_IN_LINE];
 
-        Blocks[0][0] = (ImageView) findViewById(R.id.block00_0);
-        Blocks[0][1] = (ImageView) findViewById(R.id.block00_1);
-        Blocks[0][2] = (ImageView) findViewById(R.id.block00_2);
-        Blocks[0][3] = (ImageView) findViewById(R.id.block00_3);
-        Blocks[0][4] = (ImageView) findViewById(R.id.block00_4);
-        Blocks[0][5] = (ImageView) findViewById(R.id.block00_5);
-        Blocks[0][6] = (ImageView) findViewById(R.id.block00_6);
-        Blocks[0][7] = (ImageView) findViewById(R.id.block00_7);
-        Blocks[0][8] = (ImageView) findViewById(R.id.block00_8);
-        Blocks[0][9] = (ImageView) findViewById(R.id.block00_9);
+        //블록 한 층 레이아웃 param(style.blockLine 참조)
+        LinearLayout.LayoutParams blockLineParam = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1.0f);
+        blockLineParam.setMargins(0, dp2px(1), 0, 0);
 
-        Blocks[1][0] = (ImageView) findViewById(R.id.block01_0);
-        Blocks[1][1] = (ImageView) findViewById(R.id.block01_1);
-        Blocks[1][2] = (ImageView) findViewById(R.id.block01_2);
-        Blocks[1][3] = (ImageView) findViewById(R.id.block01_3);
-        Blocks[1][4] = (ImageView) findViewById(R.id.block01_4);
-        Blocks[1][5] = (ImageView) findViewById(R.id.block01_5);
-        Blocks[1][6] = (ImageView) findViewById(R.id.block01_6);
-        Blocks[1][7] = (ImageView) findViewById(R.id.block01_7);
-        Blocks[1][8] = (ImageView) findViewById(R.id.block01_8);
-        Blocks[1][9] = (ImageView) findViewById(R.id.block01_9);
+        //블록 한 개 레이아웃 param(style.emptyBlock 참조)
+        LinearLayout.LayoutParams blockParam = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1.0f);
+        blockParam.setMargins(0, 0, dp2px(1), 0);
 
-        Blocks[2][0] = (ImageView) findViewById(R.id.block02_0);
-        Blocks[2][1] = (ImageView) findViewById(R.id.block02_1);
-        Blocks[2][2] = (ImageView) findViewById(R.id.block02_2);
-        Blocks[2][3] = (ImageView) findViewById(R.id.block02_3);
-        Blocks[2][4] = (ImageView) findViewById(R.id.block02_4);
-        Blocks[2][5] = (ImageView) findViewById(R.id.block02_5);
-        Blocks[2][6] = (ImageView) findViewById(R.id.block02_6);
-        Blocks[2][7] = (ImageView) findViewById(R.id.block02_7);
-        Blocks[2][8] = (ImageView) findViewById(R.id.block02_8);
-        Blocks[2][9] = (ImageView) findViewById(R.id.block02_9);
+        //화면에 보일 층 MAX_LINE 개 추가
+        for (int i = 0; i < MAX_LINE; i++) {
+            LinearLayout blockLine = new LinearLayout(this);
+            blockLine.setLayoutParams(blockLineParam);
 
-        Blocks[3][0] = (ImageView) findViewById(R.id.block03_0);
-        Blocks[3][1] = (ImageView) findViewById(R.id.block03_1);
-        Blocks[3][2] = (ImageView) findViewById(R.id.block03_2);
-        Blocks[3][3] = (ImageView) findViewById(R.id.block03_3);
-        Blocks[3][4] = (ImageView) findViewById(R.id.block03_4);
-        Blocks[3][5] = (ImageView) findViewById(R.id.block03_5);
-        Blocks[3][6] = (ImageView) findViewById(R.id.block03_6);
-        Blocks[3][7] = (ImageView) findViewById(R.id.block03_7);
-        Blocks[3][8] = (ImageView) findViewById(R.id.block03_8);
-        Blocks[3][9] = (ImageView) findViewById(R.id.block03_9);
+            //한 줄당 BLOCK_IN_LINE 개만큼 블록 추가하고 블록 배열에 저장
+            for (int j = 0; j < BLOCK_IN_LINE; j++) {
+                ImageView block = new ImageView(this);
+                block.setBackgroundColor(blockColorAry[0]);
+                block.setLayoutParams(blockParam);
+                blockLine.addView(block);
+                blockField[i][j] = block;
+            }
 
-        Blocks[4][0] = (ImageView) findViewById(R.id.block04_0);
-        Blocks[4][1] = (ImageView) findViewById(R.id.block04_1);
-        Blocks[4][2] = (ImageView) findViewById(R.id.block04_2);
-        Blocks[4][3] = (ImageView) findViewById(R.id.block04_3);
-        Blocks[4][4] = (ImageView) findViewById(R.id.block04_4);
-        Blocks[4][5] = (ImageView) findViewById(R.id.block04_5);
-        Blocks[4][6] = (ImageView) findViewById(R.id.block04_6);
-        Blocks[4][7] = (ImageView) findViewById(R.id.block04_7);
-        Blocks[4][8] = (ImageView) findViewById(R.id.block04_8);
-        Blocks[4][9] = (ImageView) findViewById(R.id.block04_9);
+            binding.layoutBlockField.addView(blockLine, 0);
+        }
 
-        Blocks[5][0] = (ImageView) findViewById(R.id.block05_0);
-        Blocks[5][1] = (ImageView) findViewById(R.id.block05_1);
-        Blocks[5][2] = (ImageView) findViewById(R.id.block05_2);
-        Blocks[5][3] = (ImageView) findViewById(R.id.block05_3);
-        Blocks[5][4] = (ImageView) findViewById(R.id.block05_4);
-        Blocks[5][5] = (ImageView) findViewById(R.id.block05_5);
-        Blocks[5][6] = (ImageView) findViewById(R.id.block05_6);
-        Blocks[5][7] = (ImageView) findViewById(R.id.block05_7);
-        Blocks[5][8] = (ImageView) findViewById(R.id.block05_8);
-        Blocks[5][9] = (ImageView) findViewById(R.id.block05_9);
-
-        Blocks[6][0] = (ImageView) findViewById(R.id.block06_0);
-        Blocks[6][1] = (ImageView) findViewById(R.id.block06_1);
-        Blocks[6][2] = (ImageView) findViewById(R.id.block06_2);
-        Blocks[6][3] = (ImageView) findViewById(R.id.block06_3);
-        Blocks[6][4] = (ImageView) findViewById(R.id.block06_4);
-        Blocks[6][5] = (ImageView) findViewById(R.id.block06_5);
-        Blocks[6][6] = (ImageView) findViewById(R.id.block06_6);
-        Blocks[6][7] = (ImageView) findViewById(R.id.block06_7);
-        Blocks[6][8] = (ImageView) findViewById(R.id.block06_8);
-        Blocks[6][9] = (ImageView) findViewById(R.id.block06_9);
-
-        Blocks[7][0] = (ImageView) findViewById(R.id.block07_0);
-        Blocks[7][1] = (ImageView) findViewById(R.id.block07_1);
-        Blocks[7][2] = (ImageView) findViewById(R.id.block07_2);
-        Blocks[7][3] = (ImageView) findViewById(R.id.block07_3);
-        Blocks[7][4] = (ImageView) findViewById(R.id.block07_4);
-        Blocks[7][5] = (ImageView) findViewById(R.id.block07_5);
-        Blocks[7][6] = (ImageView) findViewById(R.id.block07_6);
-        Blocks[7][7] = (ImageView) findViewById(R.id.block07_7);
-        Blocks[7][8] = (ImageView) findViewById(R.id.block07_8);
-        Blocks[7][9] = (ImageView) findViewById(R.id.block07_9);
-
-        Blocks[8][0] = (ImageView) findViewById(R.id.block08_0);
-        Blocks[8][1] = (ImageView) findViewById(R.id.block08_1);
-        Blocks[8][2] = (ImageView) findViewById(R.id.block08_2);
-        Blocks[8][3] = (ImageView) findViewById(R.id.block08_3);
-        Blocks[8][4] = (ImageView) findViewById(R.id.block08_4);
-        Blocks[8][5] = (ImageView) findViewById(R.id.block08_5);
-        Blocks[8][6] = (ImageView) findViewById(R.id.block08_6);
-        Blocks[8][7] = (ImageView) findViewById(R.id.block08_7);
-        Blocks[8][8] = (ImageView) findViewById(R.id.block08_8);
-        Blocks[8][9] = (ImageView) findViewById(R.id.block08_9);
-
-        Blocks[9][0] = (ImageView) findViewById(R.id.block09_0);
-        Blocks[9][1] = (ImageView) findViewById(R.id.block09_1);
-        Blocks[9][2] = (ImageView) findViewById(R.id.block09_2);
-        Blocks[9][3] = (ImageView) findViewById(R.id.block09_3);
-        Blocks[9][4] = (ImageView) findViewById(R.id.block09_4);
-        Blocks[9][5] = (ImageView) findViewById(R.id.block09_5);
-        Blocks[9][6] = (ImageView) findViewById(R.id.block09_6);
-        Blocks[9][7] = (ImageView) findViewById(R.id.block09_7);
-        Blocks[9][8] = (ImageView) findViewById(R.id.block09_8);
-        Blocks[9][9] = (ImageView) findViewById(R.id.block09_9);
-
-        Blocks[10][0] = (ImageView) findViewById(R.id.block10_0);
-        Blocks[10][1] = (ImageView) findViewById(R.id.block10_1);
-        Blocks[10][2] = (ImageView) findViewById(R.id.block10_2);
-        Blocks[10][3] = (ImageView) findViewById(R.id.block10_3);
-        Blocks[10][4] = (ImageView) findViewById(R.id.block10_4);
-        Blocks[10][5] = (ImageView) findViewById(R.id.block10_5);
-        Blocks[10][6] = (ImageView) findViewById(R.id.block10_6);
-        Blocks[10][7] = (ImageView) findViewById(R.id.block10_7);
-        Blocks[10][8] = (ImageView) findViewById(R.id.block10_8);
-        Blocks[10][9] = (ImageView) findViewById(R.id.block10_9);
-
-        Blocks[11][0] = (ImageView) findViewById(R.id.block11_0);
-        Blocks[11][1] = (ImageView) findViewById(R.id.block11_1);
-        Blocks[11][2] = (ImageView) findViewById(R.id.block11_2);
-        Blocks[11][3] = (ImageView) findViewById(R.id.block11_3);
-        Blocks[11][4] = (ImageView) findViewById(R.id.block11_4);
-        Blocks[11][5] = (ImageView) findViewById(R.id.block11_5);
-        Blocks[11][6] = (ImageView) findViewById(R.id.block11_6);
-        Blocks[11][7] = (ImageView) findViewById(R.id.block11_7);
-        Blocks[11][8] = (ImageView) findViewById(R.id.block11_8);
-        Blocks[11][9] = (ImageView) findViewById(R.id.block11_9);
-
-        Blocks[12][0] = (ImageView) findViewById(R.id.block12_0);
-        Blocks[12][1] = (ImageView) findViewById(R.id.block12_1);
-        Blocks[12][2] = (ImageView) findViewById(R.id.block12_2);
-        Blocks[12][3] = (ImageView) findViewById(R.id.block12_3);
-        Blocks[12][4] = (ImageView) findViewById(R.id.block12_4);
-        Blocks[12][5] = (ImageView) findViewById(R.id.block12_5);
-        Blocks[12][6] = (ImageView) findViewById(R.id.block12_6);
-        Blocks[12][7] = (ImageView) findViewById(R.id.block12_7);
-        Blocks[12][8] = (ImageView) findViewById(R.id.block12_8);
-        Blocks[12][9] = (ImageView) findViewById(R.id.block12_9);
-
-        Blocks[13][0] = (ImageView) findViewById(R.id.block13_0);
-        Blocks[13][1] = (ImageView) findViewById(R.id.block13_1);
-        Blocks[13][2] = (ImageView) findViewById(R.id.block13_2);
-        Blocks[13][3] = (ImageView) findViewById(R.id.block13_3);
-        Blocks[13][4] = (ImageView) findViewById(R.id.block13_4);
-        Blocks[13][5] = (ImageView) findViewById(R.id.block13_5);
-        Blocks[13][6] = (ImageView) findViewById(R.id.block13_6);
-        Blocks[13][7] = (ImageView) findViewById(R.id.block13_7);
-        Blocks[13][8] = (ImageView) findViewById(R.id.block13_8);
-        Blocks[13][9] = (ImageView) findViewById(R.id.block13_9);
-
-        Blocks[14][0] = (ImageView) findViewById(R.id.block14_0);
-        Blocks[14][1] = (ImageView) findViewById(R.id.block14_1);
-        Blocks[14][2] = (ImageView) findViewById(R.id.block14_2);
-        Blocks[14][3] = (ImageView) findViewById(R.id.block14_3);
-        Blocks[14][4] = (ImageView) findViewById(R.id.block14_4);
-        Blocks[14][5] = (ImageView) findViewById(R.id.block14_5);
-        Blocks[14][6] = (ImageView) findViewById(R.id.block14_6);
-        Blocks[14][7] = (ImageView) findViewById(R.id.block14_7);
-        Blocks[14][8] = (ImageView) findViewById(R.id.block14_8);
-        Blocks[14][9] = (ImageView) findViewById(R.id.block14_9);
-
-        Blocks[15][0] = (ImageView) findViewById(R.id.block15_0);
-        Blocks[15][1] = (ImageView) findViewById(R.id.block15_1);
-        Blocks[15][2] = (ImageView) findViewById(R.id.block15_2);
-        Blocks[15][3] = (ImageView) findViewById(R.id.block15_3);
-        Blocks[15][4] = (ImageView) findViewById(R.id.block15_4);
-        Blocks[15][5] = (ImageView) findViewById(R.id.block15_5);
-        Blocks[15][6] = (ImageView) findViewById(R.id.block15_6);
-        Blocks[15][7] = (ImageView) findViewById(R.id.block15_7);
-        Blocks[15][8] = (ImageView) findViewById(R.id.block15_8);
-        Blocks[15][9] = (ImageView) findViewById(R.id.block15_9);
-
-        Blocks[16][0] = (ImageView) findViewById(R.id.block16_0);
-        Blocks[16][1] = (ImageView) findViewById(R.id.block16_1);
-        Blocks[16][2] = (ImageView) findViewById(R.id.block16_2);
-        Blocks[16][3] = (ImageView) findViewById(R.id.block16_3);
-        Blocks[16][4] = (ImageView) findViewById(R.id.block16_4);
-        Blocks[16][5] = (ImageView) findViewById(R.id.block16_5);
-        Blocks[16][6] = (ImageView) findViewById(R.id.block16_6);
-        Blocks[16][7] = (ImageView) findViewById(R.id.block16_7);
-        Blocks[16][8] = (ImageView) findViewById(R.id.block16_8);
-        Blocks[16][9] = (ImageView) findViewById(R.id.block16_9);
-
-        Blocks[17][0] = (ImageView) findViewById(R.id.block17_0);
-        Blocks[17][1] = (ImageView) findViewById(R.id.block17_1);
-        Blocks[17][2] = (ImageView) findViewById(R.id.block17_2);
-        Blocks[17][3] = (ImageView) findViewById(R.id.block17_3);
-        Blocks[17][4] = (ImageView) findViewById(R.id.block17_4);
-        Blocks[17][5] = (ImageView) findViewById(R.id.block17_5);
-        Blocks[17][6] = (ImageView) findViewById(R.id.block17_6);
-        Blocks[17][7] = (ImageView) findViewById(R.id.block17_7);
-        Blocks[17][8] = (ImageView) findViewById(R.id.block17_8);
-        Blocks[17][9] = (ImageView) findViewById(R.id.block17_9);
-
-        Blocks[18][0] = (ImageView) findViewById(R.id.block18_0);
-        Blocks[18][1] = (ImageView) findViewById(R.id.block18_1);
-        Blocks[18][2] = (ImageView) findViewById(R.id.block18_2);
-        Blocks[18][3] = (ImageView) findViewById(R.id.block18_3);
-        Blocks[18][4] = (ImageView) findViewById(R.id.block18_4);
-        Blocks[18][5] = (ImageView) findViewById(R.id.block18_5);
-        Blocks[18][6] = (ImageView) findViewById(R.id.block18_6);
-        Blocks[18][7] = (ImageView) findViewById(R.id.block18_7);
-        Blocks[18][8] = (ImageView) findViewById(R.id.block18_8);
-        Blocks[18][9] = (ImageView) findViewById(R.id.block18_9);
-
-        Blocks[19][0] = (ImageView) findViewById(R.id.block19_0);
-        Blocks[19][1] = (ImageView) findViewById(R.id.block19_1);
-        Blocks[19][2] = (ImageView) findViewById(R.id.block19_2);
-        Blocks[19][3] = (ImageView) findViewById(R.id.block19_3);
-        Blocks[19][4] = (ImageView) findViewById(R.id.block19_4);
-        Blocks[19][5] = (ImageView) findViewById(R.id.block19_5);
-        Blocks[19][6] = (ImageView) findViewById(R.id.block19_6);
-        Blocks[19][7] = (ImageView) findViewById(R.id.block19_7);
-        Blocks[19][8] = (ImageView) findViewById(R.id.block19_8);
-        Blocks[19][9] = (ImageView) findViewById(R.id.block19_9);
-
-        Blocks[20][0] = (ImageView) findViewById(R.id.block20_0);
-        Blocks[20][1] = (ImageView) findViewById(R.id.block20_1);
-        Blocks[20][2] = (ImageView) findViewById(R.id.block20_2);
-        Blocks[20][3] = (ImageView) findViewById(R.id.block20_3);
-        Blocks[20][4] = (ImageView) findViewById(R.id.block20_4);
-        Blocks[20][5] = (ImageView) findViewById(R.id.block20_5);
-        Blocks[20][6] = (ImageView) findViewById(R.id.block20_6);
-        Blocks[20][7] = (ImageView) findViewById(R.id.block20_7);
-        Blocks[20][8] = (ImageView) findViewById(R.id.block20_8);
-        Blocks[20][9] = (ImageView) findViewById(R.id.block20_9);
-
-        Blocks[21][0] = (ImageView) findViewById(R.id.block21_0);
-        Blocks[21][1] = (ImageView) findViewById(R.id.block21_1);
-        Blocks[21][2] = (ImageView) findViewById(R.id.block21_2);
-        Blocks[21][3] = (ImageView) findViewById(R.id.block21_3);
-        Blocks[21][4] = (ImageView) findViewById(R.id.block21_4);
-        Blocks[21][5] = (ImageView) findViewById(R.id.block21_5);
-        Blocks[21][6] = (ImageView) findViewById(R.id.block21_6);
-        Blocks[21][7] = (ImageView) findViewById(R.id.block21_7);
-        Blocks[21][8] = (ImageView) findViewById(R.id.block21_8);
-        Blocks[21][9] = (ImageView) findViewById(R.id.block21_9);
-
-        Blocks[22][0] = (ImageView) findViewById(R.id.block22_0);
-        Blocks[22][1] = (ImageView) findViewById(R.id.block22_1);
-        Blocks[22][2] = (ImageView) findViewById(R.id.block22_2);
-        Blocks[22][3] = (ImageView) findViewById(R.id.block22_3);
-        Blocks[22][4] = (ImageView) findViewById(R.id.block22_4);
-        Blocks[22][5] = (ImageView) findViewById(R.id.block22_5);
-        Blocks[22][6] = (ImageView) findViewById(R.id.block22_6);
-        Blocks[22][7] = (ImageView) findViewById(R.id.block22_7);
-        Blocks[22][8] = (ImageView) findViewById(R.id.block22_8);
-        Blocks[22][9] = (ImageView) findViewById(R.id.block22_9);
-
-        Blocks[23][0] = (ImageView) findViewById(R.id.block23_0);
-        Blocks[23][1] = (ImageView) findViewById(R.id.block23_1);
-        Blocks[23][2] = (ImageView) findViewById(R.id.block23_2);
-        Blocks[23][3] = (ImageView) findViewById(R.id.block23_3);
-        Blocks[23][4] = (ImageView) findViewById(R.id.block23_4);
-        Blocks[23][5] = (ImageView) findViewById(R.id.block23_5);
-        Blocks[23][6] = (ImageView) findViewById(R.id.block23_6);
-        Blocks[23][7] = (ImageView) findViewById(R.id.block23_7);
-        Blocks[23][8] = (ImageView) findViewById(R.id.block23_8);
-        Blocks[23][9] = (ImageView) findViewById(R.id.block23_9);
-
-        Blocks[24][0] = (ImageView) findViewById(R.id.block24_0);
-        Blocks[24][1] = (ImageView) findViewById(R.id.block24_1);
-        Blocks[24][2] = (ImageView) findViewById(R.id.block24_2);
-        Blocks[24][3] = (ImageView) findViewById(R.id.block24_3);
-        Blocks[24][4] = (ImageView) findViewById(R.id.block24_4);
-        Blocks[24][5] = (ImageView) findViewById(R.id.block24_5);
-        Blocks[24][6] = (ImageView) findViewById(R.id.block24_6);
-        Blocks[24][7] = (ImageView) findViewById(R.id.block24_7);
-        Blocks[24][8] = (ImageView) findViewById(R.id.block24_8);
-        Blocks[24][9] = (ImageView) findViewById(R.id.block24_9);
+        //화면 위에 데이터가 한 줄 더 있는데 예외처리 하기 귀찮으니 더미 뷰 붙임
+        for (int j = 0; j < BLOCK_IN_LINE; j++) {
+            blockField[MAX_LINE][j] = new ImageView(this);
+        }
     }
 
     //미리보기 뷰와 코드를 연결
     private void SetPreview() {
-        Preview = new ImageView[4][4];
+        previewBlock = new ImageView[PREVIEW_WINDOW_SIZE][PREVIEW_WINDOW_SIZE];
 
-        Preview[0][0] = (ImageView) findViewById(R.id.block_n0_0);
-        Preview[0][1] = (ImageView) findViewById(R.id.block_n0_1);
-        Preview[0][2] = (ImageView) findViewById(R.id.block_n0_2);
-        Preview[0][3] = (ImageView) findViewById(R.id.block_n0_3);
+        for (int i = 0; i < PREVIEW_WINDOW_SIZE; i++) {
+            LinearLayout line = (LinearLayout) binding.layoutPreview.getChildAt(i + 1);
+            for (int j = 0; j < PREVIEW_WINDOW_SIZE; j++) {
+                previewBlock[i][j] = (ImageView) line.getChildAt(j + 1);
+            }
+        }
 
-        Preview[1][0] = (ImageView) findViewById(R.id.block_n1_0);
-        Preview[1][1] = (ImageView) findViewById(R.id.block_n1_1);
-        Preview[1][2] = (ImageView) findViewById(R.id.block_n1_2);
-        Preview[1][3] = (ImageView) findViewById(R.id.block_n1_3);
-
-        Preview[2][0] = (ImageView) findViewById(R.id.block_n2_0);
-        Preview[2][1] = (ImageView) findViewById(R.id.block_n2_1);
-        Preview[2][2] = (ImageView) findViewById(R.id.block_n2_2);
-        Preview[2][3] = (ImageView) findViewById(R.id.block_n2_3);
-
-        Preview[3][0] = (ImageView) findViewById(R.id.block_n3_0);
-        Preview[3][1] = (ImageView) findViewById(R.id.block_n3_1);
-        Preview[3][2] = (ImageView) findViewById(R.id.block_n3_2);
-        Preview[3][3] = (ImageView) findViewById(R.id.block_n3_3);
+//        previewBlock[0][0] = binding.blockN00;
+//        previewBlock[0][1] = (ImageView) findViewById(R.id.block_n0_1);
+//        previewBlock[0][2] = (ImageView) findViewById(R.id.block_n0_2);
+//        previewBlock[0][3] = (ImageView) findViewById(R.id.block_n0_3);
+//
+//        previewBlock[1][0] = (ImageView) findViewById(R.id.block_n1_0);
+//        previewBlock[1][1] = (ImageView) findViewById(R.id.block_n1_1);
+//        previewBlock[1][2] = (ImageView) findViewById(R.id.block_n1_2);
+//        previewBlock[1][3] = (ImageView) findViewById(R.id.block_n1_3);
+//
+//        previewBlock[2][0] = (ImageView) findViewById(R.id.block_n2_0);
+//        previewBlock[2][1] = (ImageView) findViewById(R.id.block_n2_1);
+//        previewBlock[2][2] = (ImageView) findViewById(R.id.block_n2_2);
+//        previewBlock[2][3] = (ImageView) findViewById(R.id.block_n2_3);
+//
+//        previewBlock[3][0] = (ImageView) findViewById(R.id.block_n3_0);
+//        previewBlock[3][1] = (ImageView) findViewById(R.id.block_n3_1);
+//        previewBlock[3][2] = (ImageView) findViewById(R.id.block_n3_2);
+//        previewBlock[3][3] = (ImageView) findViewById(R.id.block_n3_3);
     }
 
     //점수/레벨 표시 뷰 연결
@@ -771,12 +547,15 @@ public class GameBoardActivity extends Activity {
     private void updatePreview() {
         int[] sizeNext = BlockShape.getSize(nextBlockNumber, nextBlockRotation);
 
-        for (int i = 0; i < PREVIEW_WINDOW_SIZE; i++)
-            for (int j = 0; j < PREVIEW_WINDOW_SIZE; j++)
-                if (i < sizeNext[Y] && j < sizeNext[X])
-                    Preview[i][j].setImageResource(ResourceID.BLOCK_COLOR[nextBlock[i][j]]);
-                else
-                    Preview[i][j].setImageResource(ResourceID.BLOCK_COLOR[0]);
+        for (int i = 0; i < PREVIEW_WINDOW_SIZE; i++) {
+            for (int j = 0; j < PREVIEW_WINDOW_SIZE; j++) {
+                if (i < sizeNext[Y] && j < sizeNext[X]) {
+                    previewBlock[i][j].setBackgroundColor(blockColorAry[nextBlock[i][j]]);
+                } else {
+                    previewBlock[i][j].setBackgroundColor(blockColorAry[0]);
+                }
+            }
+        }
     }
 
     //다음 블록을 화면에 소환.
@@ -1167,7 +946,7 @@ public class GameBoardActivity extends Activity {
             for (int j = 0; j < blockSize[X]; j++)
                 if (currentBlock[i][j] != 0) {
                     blockAry[y - i][x + j] = 0;
-                    setOneBlock(y - i - 1,x + j,0);
+                    setOneBlock(y - i - 1, x + j, 0);
                 }
     }
 
@@ -1182,8 +961,8 @@ public class GameBoardActivity extends Activity {
     }
 
     //주어진 위치에 지정 블록 채우기
-    private void setOneBlock(int height, int block, int color) {
-        Blocks[height][block].setImageResource(ResourceID.BLOCK_COLOR[color]);
+    private void setOneBlock(int height, int x, int blockNumber) {
+        blockField[height][x].setBackgroundColor(blockColorAry[blockNumber]);
     }
 
     //만점 돌파하면 종료
@@ -1282,5 +1061,12 @@ public class GameBoardActivity extends Activity {
                 for (int j = 0; j < BLOCK_IN_LINE; j++)
                     setOneBlock(i - 1, j, blockAry[MAX_LINE - i][j]);
         }
+    }
+
+    private int dp2px(int dp) {
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        float density = displayMetrics.density;
+        return (int) (dp * density + 0.5);
     }
 }

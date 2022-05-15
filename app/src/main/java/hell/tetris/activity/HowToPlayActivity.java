@@ -10,9 +10,11 @@ import hell.tetris.databinding.ActivityHowToPlayBinding;
 
 public class HowToPlayActivity extends Activity {
 
+    ActivityHowToPlayBinding binding;
+
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ActivityHowToPlayBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_how_to_play);
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_how_to_play);
     }
 
     public void onClickBack(View v) {

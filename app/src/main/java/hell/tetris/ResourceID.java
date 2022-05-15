@@ -26,7 +26,7 @@ public class ResourceID {
     };
 
     //블록 색
-    public static final int[] BLOCK_COLOR = {
+    private static final int[] BLOCK_COLOR = {
             //공백. 블록 지울 때 사용
             R.drawable.blank_dot,
 
@@ -79,7 +79,7 @@ public class ResourceID {
 
     //익스트림 클리어 후
     public static final int[] OVER_THE_EXTREME = {
-            R.string.over_the_extreme_,
+            R.string.over_the_extreme_0,
             R.string.over_the_extreme_1,
             R.string.over_the_extreme_2,
             R.string.over_the_extreme_3,

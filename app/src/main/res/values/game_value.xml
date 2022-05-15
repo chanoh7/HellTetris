@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="block_color">
+        <item>#000000</item>
+
+        <item>#A349A4</item>
+        <item>#ED1C24</item>
+        <item>#FF7F27</item>
+        <item>#FFF200</item>
+        <item>#45F23C</item>
+        <item>#56EFD5</item>
+        <item>#FFAEC9</item>
+        <item>#880015</item>
+        <item>#B97A57</item>
+        <item>#56EFD5</item>
+
+        <item>#FFAEC9</item>
+        <item>#ED1C24</item>
+        <item>#FF7F27</item>
+        <item>#FFF200</item>
+        <item>#45F23C</item>
+        <item>#FFAEC9</item>
+        <item>#56EFD5</item>
+        <item>#FFFF80</item>
+        <item>#B5E61D</item>
+        <item>#B97A57</item>
+
+        <item>#880015</item>
+        <item>#9B4E00</item>
+    </array>
+
+    <array name="level">
+        <item>R.drawable.easy</item>
+        <item>R.drawable.normal</item>
+        <item>R.drawable.hard</item>
+        <item>R.drawable.extreme</item>
+        <item>R.drawable.hell</item>
+    </array>
+
+    <array name="digit">
+        <item>R.drawable.digit0</item>
+        <item>R.drawable.digit1</item>
+        <item>R.drawable.digit2</item>
+        <item>R.drawable.digit3</item>
+        <item>R.drawable.digit4</item>
+        <item>R.drawable.digit5</item>
+        <item>R.drawable.digit6</item>
+        <item>R.drawable.digit7</item>
+        <item>R.drawable.digit8</item>
+        <item>R.drawable.digit9</item>
+    </array>
+
+    <array name="next_of">
+        <item>R.string.next_of_easy</item>
+        <item>R.string.next_of_normal</item>
+        <item>R.string.next_of_hard</item>
+        <item>R.string.next_of_extreme</item>
+        <item>R.string.next_of_extreme_2</item>
+    </array>
+
+    <array name="over_the_extreme">
+        <item>R.string.over_the_extreme_0</item>
+        <item>R.string.over_the_extreme_1</item>
+        <item>R.string.over_the_extreme_2</item>
+        <item>R.string.over_the_extreme_3</item>
+        <item>R.string.over_the_extreme_4</item>
+        <item>R.string.over_the_extreme_5</item>
+        <item>R.string.over_the_extreme_6</item>
+        <item>R.string.over_the_extreme_7</item>
+        <item>R.string.over_the_extreme_8</item>
+        <item>R.string.over_the_extreme_9</item>
+        <item>R.string.over_the_extreme_10</item>
+        <item>R.string.over_the_extreme_11</item>
+    </array>
+
+    <array name="over_the_hell">
+        <item>R.string.over_the_hell_0</item>
+        <item>R.string.over_the_hell_1</item>
+        <item>R.string.over_the_hell_2</item>
+        <item>R.string.over_the_hell_3</item>
+        <item>R.string.over_the_hell_4</item>
+        <item>R.string.over_the_hell_5</item>
+        <item>R.string.over_the_hell_6</item>
+    </array>
+
+</resources>

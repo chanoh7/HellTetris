@@ -10,9 +10,12 @@ import hell.tetris.R;
 import hell.tetris.databinding.ActiviyMainBinding;
 
 public class MainActivity extends Activity {
+
+    ActiviyMainBinding binding;
+
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ActiviyMainBinding binding = DataBindingUtil.setContentView(this, R.layout.activiy_main);
+        binding = DataBindingUtil.setContentView(this, R.layout.activiy_main);
     }
 
     public void onMenuSelect(View v) {
