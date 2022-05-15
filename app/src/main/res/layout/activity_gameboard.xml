@@ -163,27 +163,20 @@
 
 			<!-- 점수 값 -->
 			 <LinearLayout
+				 android:id="@+id/layout_score"
 				style="@style/gameInfo">
-
 				<ImageView
-					android:id="@+id/score5"
 					style="@style/digitValue"/>
 				<ImageView
-					android:id="@+id/score4"
 					style="@style/digitValue"/>
 				<ImageView
-					android:id="@+id/score3"
 					style="@style/digitValue"/>
 				<ImageView
-					android:id="@+id/score2"
 					style="@style/digitValue"/>
 				<ImageView
-					android:id="@+id/score1"
 					style="@style/digitValue"/>
 				<ImageView
-					android:id="@+id/score0"
 					style="@style/digitValue"/>
-
 			</LinearLayout>
 
 			<!-- LEVEL -->
@@ -193,18 +186,15 @@
 
 			<!-- 레벨 값 -->
 			<LinearLayout
+				android:id="@+id/layout_level"
 				style="@style/gameInfo"
 				android:gravity="center">
-
 				<ImageView
-					android:id="@+id/level1"
 					style="@style/digitValue"
 					android:scaleType="fitEnd"/>
 				<ImageView
-					android:id="@+id/level0"
 					style="@style/digitValue"
 					android:scaleType="fitStart"/>
-
 			</LinearLayout>
 
 			<!-- 난이도 표시 -->

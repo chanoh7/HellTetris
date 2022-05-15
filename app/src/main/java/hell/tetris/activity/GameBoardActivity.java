@@ -142,7 +142,7 @@ public class GameBoardActivity extends Activity {
 
         init();
         initBlockField();
-        SetPreview();
+        initPreview();
         setScoreAndLevelView();
         resetData();
     }
@@ -361,51 +361,32 @@ public class GameBoardActivity extends Activity {
         }
     }
 
-    //미리보기 뷰와 코드를 연결
-    private void SetPreview() {
+    //미리보기 뷰 초기화
+    private void initPreview() {
         previewBlock = new ImageView[PREVIEW_WINDOW_SIZE][PREVIEW_WINDOW_SIZE];
 
+        //여백 맞추느라 위, 앞에 더미 뷰 하나씩 있어서 인덱스에 +1씩 함.
         for (int i = 0; i < PREVIEW_WINDOW_SIZE; i++) {
             LinearLayout line = (LinearLayout) binding.layoutPreview.getChildAt(i + 1);
             for (int j = 0; j < PREVIEW_WINDOW_SIZE; j++) {
                 previewBlock[i][j] = (ImageView) line.getChildAt(j + 1);
             }
         }
-
-//        previewBlock[0][0] = binding.blockN00;
-//        previewBlock[0][1] = (ImageView) findViewById(R.id.block_n0_1);
-//        previewBlock[0][2] = (ImageView) findViewById(R.id.block_n0_2);
-//        previewBlock[0][3] = (ImageView) findViewById(R.id.block_n0_3);
-//
-//        previewBlock[1][0] = (ImageView) findViewById(R.id.block_n1_0);
-//        previewBlock[1][1] = (ImageView) findViewById(R.id.block_n1_1);
-//        previewBlock[1][2] = (ImageView) findViewById(R.id.block_n1_2);
-//        previewBlock[1][3] = (ImageView) findViewById(R.id.block_n1_3);
-//
-//        previewBlock[2][0] = (ImageView) findViewById(R.id.block_n2_0);
-//        previewBlock[2][1] = (ImageView) findViewById(R.id.block_n2_1);
-//        previewBlock[2][2] = (ImageView) findViewById(R.id.block_n2_2);
-//        previewBlock[2][3] = (ImageView) findViewById(R.id.block_n2_3);
-//
-//        previewBlock[3][0] = (ImageView) findViewById(R.id.block_n3_0);
-//        previewBlock[3][1] = (ImageView) findViewById(R.id.block_n3_1);
-//        previewBlock[3][2] = (ImageView) findViewById(R.id.block_n3_2);
-//        previewBlock[3][3] = (ImageView) findViewById(R.id.block_n3_3);
     }
 
-    //점수/레벨 표시 뷰 연결
+    //점수/레벨 표시 뷰를 배열에 연결
     private void setScoreAndLevelView() {
-        levelView = new ImageView[2];
-        levelView[0] = (ImageView) findViewById(R.id.level0);
-        levelView[1] = (ImageView) findViewById(R.id.level1);
+        int levelViewCount = binding.layoutLevel.getChildCount();
+        levelView = new ImageView[levelViewCount];
+        for (int i = 0; i < levelViewCount; i++) {
+            levelView[i] = (ImageView) binding.layoutLevel.getChildAt(i);
+        }
 
-        scoreView = new ImageView[6];
-        scoreView[0] = (ImageView) findViewById(R.id.score0);
-        scoreView[1] = (ImageView) findViewById(R.id.score1);
-        scoreView[2] = (ImageView) findViewById(R.id.score2);
-        scoreView[3] = (ImageView) findViewById(R.id.score3);
-        scoreView[4] = (ImageView) findViewById(R.id.score4);
-        scoreView[5] = (ImageView) findViewById(R.id.score5);
+        int scoreViewCount = binding.layoutScore.getChildCount();
+        scoreView = new ImageView[scoreViewCount];
+        for (int i = 0; i < scoreViewCount; i++) {
+            scoreView[i] = (ImageView) binding.layoutScore.getChildAt(i);
+        }
     }
 
     //화면 빼고 초기화
@@ -732,21 +713,23 @@ public class GameBoardActivity extends Activity {
     //점수 갱신
     public void updateScore() {
         //최고점 돌파하면 그만
-        if (score > MAX_SCORE)
+        if (score > MAX_SCORE) {
             gameClear();
-        else {
+        } else {
             if (level < MAX_LEVEL) {
-                if (exp > MAX_EXP[level])
+                if (exp > MAX_EXP[level]) {
                     updateLevel(true);
-            } else if (exp > OVER_EXP)
+                }
+            } else if (exp > OVER_EXP) {
                 updateLevel(false);
+            }
         }
 
         //점수판 각 자릿수에 맞는 숫자 출력
-        int scale = 1;
+        int scale = 100000;
         for (ImageView scoreDigit : scoreView) {
             scoreDigit.setImageResource(ResourceID.DIGIT[(score / scale) % 10]);
-            scale *= 10;
+            scale /= 10;
         }
     }
 
@@ -757,12 +740,13 @@ public class GameBoardActivity extends Activity {
 
         if (isLvUp) {
             level++;
-            levelView[0].setImageResource(ResourceID.DIGIT[level % 10]);
-            levelView[1].setImageResource(ResourceID.DIGIT[level / 10]);
+            levelView[0].setImageResource(ResourceID.DIGIT[level / 10]);
+            levelView[1].setImageResource(ResourceID.DIGIT[level % 10]);
             speed -= SPEEDUP;
             bonusDel = level;
-        } else
+        } else {
             bonusDel = (int) (Math.random() * 6) + 5;
+        }
 
         //렙업 점수
         multi = 0;
