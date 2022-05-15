@@ -7,9 +7,11 @@ import android.view.*;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import androidx.databinding.DataBindingUtil;
 import hell.tetris.BlockShape;
 import hell.tetris.R;
 import hell.tetris.ResourceID;
+import hell.tetris.databinding.ActivityGameboardBinding;
 
 enum ActiveState {STATE_READY, STATE_RUN, STATE_PAUSE, STATE_END}
 
@@ -79,7 +81,7 @@ public class GameBoardActivity extends Activity {
 
     private static final int BTN_RESET = R.drawable.reset;
     private static final int BTN_PAUSE = R.drawable.pause;
-    private static final int BTN_GO = R.drawable.go;
+    private static final int BTN_RESUME = R.drawable.resume;
     private static final int BTN_SURPRISE = R.drawable.suprise;
     public static final int PREVIEW_WINDOW_SIZE = 4;
 
@@ -133,7 +135,7 @@ public class GameBoardActivity extends Activity {
     //생성자
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.gameboard);
+        ActivityGameboardBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_gameboard);
 
         SetBlocksView();
         SetPreview();
@@ -155,7 +157,7 @@ public class GameBoardActivity extends Activity {
         super.onPause();
         if (state == ActiveState.STATE_RUN) {
             state = ActiveState.STATE_PAUSE;
-            ((ImageView) findViewById(R.id.stateButton)).setImageResource(BTN_GO);
+            ((ImageView) findViewById(R.id.btnState)).setImageResource(BTN_RESUME);
         }
     }
 
@@ -268,10 +270,10 @@ public class GameBoardActivity extends Activity {
     }
 
     //시작, 일시정지 버튼
-    public void changeState(View v) {
+    public void onClickState(View v) {
         switch (state) {
             case STATE_READY:
-                ((ImageView) findViewById(R.id.levelbutton)).setClickable(false);
+                ((ImageView) findViewById(R.id.btnLevel)).setClickable(false);
                 state = ActiveState.STATE_RUN;
                 ((ImageView) v).setImageResource(BTN_PAUSE);
                 run();
@@ -279,7 +281,7 @@ public class GameBoardActivity extends Activity {
 
             case STATE_RUN:
                 state = ActiveState.STATE_PAUSE;
-                ((ImageView) v).setImageResource(BTN_GO);
+                ((ImageView) v).setImageResource(BTN_RESUME);
                 break;
 
             case STATE_PAUSE:
@@ -296,14 +298,14 @@ public class GameBoardActivity extends Activity {
                 else {
                     resetWithScreen();
                     state = ActiveState.STATE_READY;
-                    ((ImageView) v).setImageResource(BTN_GO);
+                    ((ImageView) v).setImageResource(BTN_RESUME);
                 }
                 break;
         }
     }
 
     //난이도 변경
-    public void changeLevel(View v) {
+    public void onClickLevel(View v) {
         gameType = gameType.next();
         ((ImageView) v).setImageResource(ResourceID.LEVEL[gameType.ordinal()]);
 
@@ -635,8 +637,8 @@ public class GameBoardActivity extends Activity {
         level = score = 0;
         updateLevel(true);
 
-        ((ImageView) findViewById(R.id.levelbutton)).setClickable(true);
-        ((ImageView) findViewById(R.id.levelbutton)).setImageResource(ResourceID.LEVEL[gameType.ordinal()]);
+        ((ImageView) findViewById(R.id.btnLevel)).setClickable(true);
+        ((ImageView) findViewById(R.id.btnLevel)).setImageResource(ResourceID.LEVEL[gameType.ordinal()]);
 
         what = 0;
         speed = INITIAL_SPEED;
@@ -730,7 +732,7 @@ public class GameBoardActivity extends Activity {
 
                 case PHASE_END:
                     state = ActiveState.STATE_END;
-                    ((ImageView) findViewById(R.id.stateButton)).setImageResource(BTN_RESET);
+                    ((ImageView) findViewById(R.id.btnState)).setImageResource(BTN_RESET);
                     break;
             }
     }
@@ -1165,7 +1167,7 @@ public class GameBoardActivity extends Activity {
             for (int j = 0; j < blockSize[X]; j++)
                 if (currentBlock[i][j] != 0) {
                     blockAry[y - i][x + j] = 0;
-                    Blocks[y - i - 1][x + j].setImageResource(ResourceID.BLOCK_COLOR[0]);
+                    setOneBlock(y - i - 1,x + j,0);
                 }
     }
 
@@ -1189,7 +1191,7 @@ public class GameBoardActivity extends Activity {
         score = MAX_SCORE;
 
         state = ActiveState.STATE_END;
-        ((ImageView) findViewById(R.id.stateButton)).setImageResource(BTN_RESET);
+        ((ImageView) findViewById(R.id.btnState)).setImageResource(BTN_RESET);
 
         switch (gameType) {
             case EASY:
@@ -1230,7 +1232,7 @@ public class GameBoardActivity extends Activity {
 
             case HELL:
                 clearHell = true;
-                ((ImageView) findViewById(R.id.stateButton)).setImageResource(BTN_SURPRISE);
+                ((ImageView) findViewById(R.id.btnState)).setImageResource(BTN_SURPRISE);
 
                 new AlertDialog.Builder(this)
                         .setCancelable(false)

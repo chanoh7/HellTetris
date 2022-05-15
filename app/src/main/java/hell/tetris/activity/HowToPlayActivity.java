@@ -4,17 +4,18 @@ import android.app.*;
 import android.os.*;
 import android.view.*;
 
+import androidx.databinding.DataBindingUtil;
 import hell.tetris.R;
+import hell.tetris.databinding.ActivityHowToPlayBinding;
 
 public class HowToPlayActivity extends Activity {
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.how_to_play);
-	}
-    
-    public void backToHome(View v)
-    {
-    	finish();
+        ActivityHowToPlayBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_how_to_play);
+    }
+
+    public void onClickBack(View v) {
+        finish();
     }
 }
