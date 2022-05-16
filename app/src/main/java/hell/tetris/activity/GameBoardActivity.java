@@ -426,6 +426,50 @@ public class GameBoardActivity extends Activity {
 
         phase = GamePhase.PHASE_NEXT_BLOCK;
         state = ActiveState.STATE_READY;
+
+        makeDummyField();
+    }
+
+    private void makeDummyField() {
+//        blockAry = new int[][]{
+//                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},//26
+//                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+//                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+//                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+//                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+//                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+//                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},//20
+//                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+//                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+//                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+//                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+//                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+//                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+//                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+//                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+//                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+//                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},//10
+//                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+//                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+//                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+//                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+//                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+//                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+//                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+//                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+//                {1, 2, 3, 4, 5, 6, 0, 0, 0, 0},//1
+//        };
+
+        for (int i = 0; i < 6; i++) {
+            blockAry[1][i] = i + 1;
+            lineWeight[1]++;
+            setOneBlock(0, i, i + 1);
+        }
+
+        nextBlockNumber = 1;
+        nextBlockRotation = 1;
+        nextBlock = BlockShape.shape[nextBlockNumber - 1][nextBlockRotation];
+        updatePreview();
     }
 
     //화면까지 초기화
@@ -710,7 +754,7 @@ public class GameBoardActivity extends Activity {
     //한 줄 제거 함수
     private void clearTargetLine(int l) {
         int k;
-
+        
         //윗줄 전체를(빈 줄이 아닐 때만) 아래로 당긴다.
         for (k = l; lineWeight[k + 1] > 0 && k < MAX_LINE; k++) {
             lineWeight[k] = lineWeight[k + 1];
