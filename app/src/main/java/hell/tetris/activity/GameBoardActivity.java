@@ -171,6 +171,7 @@ public class GameBoardActivity extends Activity {
             case KeyEvent.KEYCODE_BACK:
                 if (state == ActiveState.STATE_RUN) {
                     state = ActiveState.STATE_PAUSE;
+                    binding.btnState.setImageResource(BTN_RESUME);
                 }
 
                 showDialog(DIA_EXIT);
@@ -286,18 +287,18 @@ public class GameBoardActivity extends Activity {
             case STATE_READY:
                 binding.btnLevel.setClickable(false);
                 state = ActiveState.STATE_RUN;
-                ((ImageView) v).setImageResource(BTN_PAUSE);
+                binding.btnState.setImageResource(BTN_PAUSE);
                 run();
                 break;
 
             case STATE_RUN:
                 state = ActiveState.STATE_PAUSE;
-                ((ImageView) v).setImageResource(BTN_RESUME);
+                binding.btnState.setImageResource(BTN_RESUME);
                 break;
 
             case STATE_PAUSE:
                 state = ActiveState.STATE_RUN;
-                ((ImageView) v).setImageResource(BTN_PAUSE);
+                binding.btnState.setImageResource(BTN_PAUSE);
                 run();
                 break;
 
@@ -309,7 +310,7 @@ public class GameBoardActivity extends Activity {
                 } else {
                     resetWithScreen();
                     state = ActiveState.STATE_READY;
-                    ((ImageView) v).setImageResource(BTN_RESUME);
+                    binding.btnState.setImageResource(BTN_RESUME);
                 }
                 break;
         }
@@ -336,6 +337,7 @@ public class GameBoardActivity extends Activity {
         cmdDropRange = Integer.min(cmdMoveRange * 4, 200);
         cmdRotateRange = Integer.min((int) (cmdMoveRange * 1.5), 40);
 
+        //충돌 판정을 쉽게 하기 위해, 화면 밑(밖)에 지하 1층을 만든다.
         lineWeight = new int[MAX_LINE + 2];
         blockAry = new int[MAX_LINE + 2][BLOCK_IN_LINE];
         for (int i = 0; i < BLOCK_IN_LINE; i++) {
